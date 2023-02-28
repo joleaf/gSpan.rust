@@ -1,7 +1,7 @@
-use std::borrow::Borrow;
-use std::collections::HashSet;
 use crate::models::edge::Edge;
 use crate::models::pdfs::PDFS;
+use std::borrow::Borrow;
+use std::collections::HashSet;
 
 pub struct History<'a> {
     pub histories: Vec<&'a Edge>,
@@ -23,7 +23,7 @@ impl<'a> History<'a> {
             history.vertices.insert(e.edge.from);
             history.vertices.insert(e.edge.to);
             if e.prev.is_none() {
-                break
+                break;
             }
             e = e.prev.as_ref().unwrap()
         }

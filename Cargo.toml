@@ -2,8 +2,13 @@
 name = "gspan"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Jonas Blatt <jonblatt1992@gmail.com>"]
+license = "MIT"
+description = "A tool to search frequent subgraphs in a graph database"
+readme = "Readme.md"
+repository = "https://github.com/joleaf/gSpan.rust"
+keywords = ["cli", "gspan", "graph", "frequent", 'subgraph']
+categories = ["algorithm", "command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.1.7", features = ["derive"] }

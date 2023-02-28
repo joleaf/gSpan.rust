@@ -1,10 +1,10 @@
+use crate::gspan::GSpanConfig;
+use crate::models::graph::Graph;
 use std::time::Instant;
-use crate::models::graph::{Graph};
-use crate::gspan::{GSpanConfig};
 
-pub mod models;
-mod misc;
 mod gspan;
+mod misc;
+pub mod models;
 
 use clap::Parser;
 
@@ -15,6 +15,7 @@ struct Args {
     /// Input file with the graph database
     #[arg(short, long)]
     input: String,
+
     /// Output file for the resulting subgraphs
     #[arg(short, long, default_value = "out.txt")]
     output: String,
@@ -49,11 +50,19 @@ fn main() {
         Ok(ref graphs) => {
             println!("All good parsing input file, found {} graphs", graphs.len());
         }
-        Err(err) => panic!("{}", err.to_string())
+        Err(err) => panic!("{}", err.to_string()),
     }
     let graphs = graphs.unwrap();
     println!("Mining subgraphs..");
-    let gspan = GSpanConfig::new(graphs, args.support, args.min_vertices, args.max_vertices, args.directed, false, args.output);
+    let gspan = GSpanConfig::new(
+        graphs,
+        args.support,
+        args.min_vertices,
+        args.max_vertices,
+        args.directed,
+        false,
+        args.output,
+    );
     let subgraphs = gspan.run();
     let delta = now.elapsed().as_millis();
     println!("Finished.");

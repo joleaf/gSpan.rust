@@ -8,7 +8,7 @@ pub struct Projected<'a> {
 impl<'a> Projected<'a> {
     pub fn new() -> Projected<'a> {
         Projected {
-            projections: Vec::new()
+            projections: Vec::new(),
         }
     }
     pub fn push(&mut self, id: usize, edge: &'a Edge, prev: Option<&'a PDFS<'a>>) {

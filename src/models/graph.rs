@@ -1,9 +1,9 @@
-use std::{fmt, io};
-use std::fs::{File};
-use std::io::BufRead;
-use std::path::Path;
 use crate::models::edge::Edge;
 use crate::models::vertex::Vertex;
+use std::fs::File;
+use std::io::BufRead;
+use std::path::Path;
+use std::{fmt, io};
 
 #[derive(Debug)]
 pub struct GraphSetParseError {
@@ -15,7 +15,6 @@ impl fmt::Display for GraphSetParseError {
         write!(f, "{}", self.message)
     }
 }
-
 
 #[derive(Debug)]
 pub struct Graph {
@@ -59,8 +58,13 @@ impl Graph {
         //todo!()
     }
 
-    pub fn graphs_set_from_file<P>(path: P, directed: bool) -> Result<Vec<Graph>, GraphSetParseError>
-        where P: AsRef<Path>, {
+    pub fn graphs_set_from_file<P>(
+        path: P,
+        directed: bool,
+    ) -> Result<Vec<Graph>, GraphSetParseError>
+    where
+        P: AsRef<Path>,
+    {
         let mut graph_list = Vec::new();
         let mut current_graph: Graph = Graph::new(usize::MAX, directed);
         let line_reader = read_lines(path);
@@ -73,10 +77,10 @@ impl Graph {
                             match data_type {
                                 "t" => {
                                     let _ = data.next().ok_or(GraphSetParseError {
-                                        message: "Missing '#' in graph".to_string()
+                                        message: "Missing '#' in graph".to_string(),
                                     })?;
                                     let id = data.next().ok_or(GraphSetParseError {
-                                        message: "Id for graph is missing".to_string()
+                                        message: "Id for graph is missing".to_string(),
                                     })?;
                                     if id == "-1" {
                                         break;
@@ -87,12 +91,20 @@ impl Graph {
                                     let id = id.parse::<usize>();
                                     match id {
                                         Ok(id) => current_graph = Graph::new(id, directed),
-                                        _ => return Err(GraphSetParseError { message: "Id for graph invalid".to_string() })
+                                        _ => {
+                                            return Err(GraphSetParseError {
+                                                message: "Id for graph invalid".to_string(),
+                                            })
+                                        }
                                     }
                                 }
                                 "v" => {
                                     let id = data.next().ok_or(GraphSetParseError {
-                                        message: format!("Graph {}, Missing id for a vertex in", current_graph.id.to_string()).to_string()
+                                        message: format!(
+                                            "Graph {}, Missing id for a vertex in",
+                                            current_graph.id.to_string()
+                                        )
+                                        .to_string(),
                                     })?;
                                     let id = id.parse::<usize>();
                                     match id {
@@ -104,67 +116,123 @@ impl Graph {
                                                 });
                                             }
                                             let label = data.next().ok_or(GraphSetParseError {
-                                                message: format!("Graph {}, Missing label for a vertex", current_graph.id.to_string()).to_string()
+                                                message: format!(
+                                                    "Graph {}, Missing label for a vertex",
+                                                    current_graph.id.to_string()
+                                                )
+                                                .to_string(),
                                             })?;
                                             let label = label.parse::<isize>();
                                             if label.is_err() {
                                                 return Err(GraphSetParseError {
-                                                    message: format!("Graph {}, Vertex {}, Label invalid", current_graph.id.to_string(), id.to_string())
+                                                    message: format!(
+                                                        "Graph {}, Vertex {}, Label invalid",
+                                                        current_graph.id.to_string(),
+                                                        id.to_string()
+                                                    ),
                                                 });
                                             }
                                             current_graph.get_last_vertex().label = label.unwrap();
                                         }
-                                        _ => return Err(GraphSetParseError {
-                                            message: format!("Graph {}, Vertex ID invalid", current_graph.id.to_string()).to_string()
-                                        })
+                                        _ => {
+                                            return Err(GraphSetParseError {
+                                                message: format!(
+                                                    "Graph {}, Vertex ID invalid",
+                                                    current_graph.id.to_string()
+                                                )
+                                                .to_string(),
+                                            })
+                                        }
                                     }
                                 }
                                 "e" => {
                                     let from_id = data.next().ok_or(GraphSetParseError {
-                                        message: format!("Graph {}, Missing from id for an edge", current_graph.id.to_string()).to_string()
+                                        message: format!(
+                                            "Graph {}, Missing from id for an edge",
+                                            current_graph.id.to_string()
+                                        )
+                                        .to_string(),
                                     })?;
                                     let from_id: usize = match from_id.parse() {
                                         Ok(value) => value,
-                                        _ => return Err(GraphSetParseError {
-                                            message: format!("Graph {}, Invalid from id for an edge", current_graph.id.to_string()).to_string()
-                                        })
+                                        _ => {
+                                            return Err(GraphSetParseError {
+                                                message: format!(
+                                                    "Graph {}, Invalid from id for an edge",
+                                                    current_graph.id.to_string()
+                                                )
+                                                .to_string(),
+                                            })
+                                        }
                                     };
                                     let to_id = data.next().ok_or(GraphSetParseError {
-                                        message: format!("Graph {}, Missing to id for a edge in", current_graph.id.to_string()).to_string()
+                                        message: format!(
+                                            "Graph {}, Missing to id for a edge in",
+                                            current_graph.id.to_string()
+                                        )
+                                        .to_string(),
                                     })?;
                                     let to_id: usize = match to_id.parse() {
                                         Ok(value) => value,
-                                        _ => return Err(GraphSetParseError {
-                                            message: format!("Graph {}, Invalid to id for a edge", current_graph.id.to_string()).to_string()
-                                        })
+                                        _ => {
+                                            return Err(GraphSetParseError {
+                                                message: format!(
+                                                    "Graph {}, Invalid to id for a edge",
+                                                    current_graph.id.to_string()
+                                                )
+                                                .to_string(),
+                                            })
+                                        }
                                     };
                                     let e_label = data.next().ok_or(GraphSetParseError {
-                                        message: format!("Graph {}, Missing edge label for a edge", current_graph.id.to_string()).to_string()
+                                        message: format!(
+                                            "Graph {}, Missing edge label for a edge",
+                                            current_graph.id.to_string()
+                                        )
+                                        .to_string(),
                                     })?;
                                     let e_label: usize = match e_label.parse() {
                                         Ok(value) => value,
-                                        _ => return Err(GraphSetParseError {
-                                            message: format!("Graph {}, Invalid e_label for a edge", current_graph.id.to_string()).to_string()
-                                        })
+                                        _ => {
+                                            return Err(GraphSetParseError {
+                                                message: format!(
+                                                    "Graph {}, Invalid e_label for a edge",
+                                                    current_graph.id.to_string()
+                                                )
+                                                .to_string(),
+                                            })
+                                        }
                                     };
 
-                                    if !current_graph.has_vertex_with_id(&from_id) || !current_graph.has_vertex_with_id(&to_id) {
+                                    if !current_graph.has_vertex_with_id(&from_id)
+                                        || !current_graph.has_vertex_with_id(&to_id)
+                                    {
                                         return Err(GraphSetParseError {
-                                            message: format!("Graph {}, Edge invalid, ids of vertices not found", current_graph.id.to_string()).to_string()
+                                            message: format!(
+                                                "Graph {}, Edge invalid, ids of vertices not found",
+                                                current_graph.id.to_string()
+                                            )
+                                            .to_string(),
                                         });
                                     }
 
-                                    let from_vertex: Option<&mut Vertex> = current_graph.vertices.get_mut(from_id);
+                                    let from_vertex: Option<&mut Vertex> =
+                                        current_graph.vertices.get_mut(from_id);
                                     match from_vertex {
                                         Some(from_vertex) => {
                                             from_vertex.push(to_id, e_label);
                                         }
                                         _ => return Err(GraphSetParseError {
-                                            message: format!("Graph {}, Edge invalid, ids of vertices not found", current_graph.id.to_string()).to_string()
-                                        })
+                                            message: format!(
+                                                "Graph {}, Edge invalid, ids of vertices not found",
+                                                current_graph.id.to_string()
+                                            )
+                                            .to_string(),
+                                        }),
                                     }
                                     if directed {
-                                        let from_vertex: Option<&mut Vertex> = current_graph.vertices.get_mut(to_id);
+                                        let from_vertex: Option<&mut Vertex> =
+                                            current_graph.vertices.get_mut(to_id);
                                         match from_vertex {
                                             Some(from_vertex) => {
                                                 from_vertex.push(from_id, e_label);
@@ -181,7 +249,11 @@ impl Graph {
                     }
                 }
             }
-            Err(_) => return Err(GraphSetParseError { message: "Error reading file".to_string() })
+            Err(_) => {
+                return Err(GraphSetParseError {
+                    message: "Error reading file".to_string(),
+                })
+            }
         }
         if current_graph.id != usize::MAX {
             graph_list.push(current_graph);
@@ -209,7 +281,9 @@ impl Graph {
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-    where P: AsRef<Path>, {
+where
+    P: AsRef<Path>,
+{
     let file = File::open(filename)?;
     Ok(io::BufReader::new(file).lines())
 }

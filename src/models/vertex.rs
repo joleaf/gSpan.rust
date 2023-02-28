@@ -13,7 +13,7 @@ impl Vertex {
             id,
             label: match label {
                 None => 0,
-                Some(label) => label
+                Some(label) => label,
             },
             edges: Vec::new(),
         }

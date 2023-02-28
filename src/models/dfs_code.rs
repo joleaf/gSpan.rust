@@ -1,7 +1,7 @@
-use std::cmp;
-use std::cmp::max;
 use crate::models::dfs::DFS;
 use crate::models::graph::Graph;
+use std::cmp;
+use std::cmp::max;
 
 pub struct DFSCode {
     pub dfs_vec: Vec<DFS>,
@@ -14,10 +14,16 @@ impl DFSCode {
         }
     }
 
-    pub fn push(&mut self, from: usize, to: usize, from_label: isize, e_label: usize, to_label: isize) {
-        self.dfs_vec.push(DFS::from(
-            from, to, from_label, e_label, to_label,
-        ))
+    pub fn push(
+        &mut self,
+        from: usize,
+        to: usize,
+        from_label: isize,
+        e_label: usize,
+        to_label: isize,
+    ) {
+        self.dfs_vec
+            .push(DFS::from(from, to, from_label, e_label, to_label))
     }
 
     pub fn pop(&mut self) -> Option<DFS> {

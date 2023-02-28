@@ -13,8 +13,8 @@ impl<'a> PDFS<'a> {
             edge,
             prev: match prev {
                 Some(prev) => Some(Box::new(prev)),
-                None => None
-            }
+                None => None,
+            },
         }
     }
 }

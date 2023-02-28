@@ -58,10 +58,10 @@ e 3 4 1
 
 or see [test](test) for a large graph database.
 
-### Run the frequent sub
+### Run gSpan
 
 ```shell
-./gspan --input test --support 10 --min-vertices 1 --max-vertices 100 --directed
+./gspan --input test --support 100 --min-vertices 1 --max-vertices 10 --directed
 ```
 
 Get help:
@@ -92,5 +92,5 @@ tba
 Install [rustup](https://rustup.rs/) (cargo) and run:
 
 ```shell
-RUSTFLAGS="-C target-cpu=native" cargo build --release
+RUSTFLAGS="-C target-cpu=native" cargo build --release --all-features && cp target/release/gspan .
 ```

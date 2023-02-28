@@ -1,12 +1,12 @@
-use std::collections::{BTreeMap, HashMap};
-use std::fs::File;
-use std::io::{BufWriter, Write};
 use crate::misc::{get_backward, get_forward_pure, get_forward_rm_path, get_forward_root};
 use crate::models::dfs_code::DFSCode;
 use crate::models::edge::Edge;
 use crate::models::graph::Graph;
 use crate::models::history::History;
 use crate::models::projected::Projected;
+use std::collections::{BTreeMap, HashMap};
+use std::fs::File;
+use std::io::{BufWriter, Write};
 
 pub struct GSpanConfig {
     out_path: String,
@@ -19,7 +19,15 @@ pub struct GSpanConfig {
 }
 
 impl GSpanConfig {
-    pub fn new(graphs: Vec<Graph>, min_sup: usize, max_pat_min: usize, max_pat_max: usize, directed: bool, single_nodes: bool, out_path: String) -> GSpanConfig {
+    pub fn new(
+        graphs: Vec<Graph>,
+        min_sup: usize,
+        max_pat_min: usize,
+        max_pat_max: usize,
+        directed: bool,
+        single_nodes: bool,
+        out_path: String,
+    ) -> GSpanConfig {
         GSpanConfig {
             trans: graphs,
             min_sup,
@@ -44,7 +52,10 @@ impl GSpanConfig {
                     let key = vertex.label;
                     let d = single_vertex.entry(graph.id).or_insert(BTreeMap::new());
                     if d.get(&key).is_none() {
-                        single_vertex_label.entry(key).and_modify(|v| *v += 1).or_insert(1);
+                        single_vertex_label
+                            .entry(key)
+                            .and_modify(|v| *v += 1)
+                            .or_insert(1);
                     }
                     d.entry(key).and_modify(|v| *v += 1).or_insert(1);
                 }
@@ -79,7 +90,8 @@ impl GSpanConfig {
             self.report_single(&mut out, &mut g, &mut gy_counts);
         }
         // 3. Subgraphs > Verticies
-        let mut root: BTreeMap<isize, BTreeMap<usize, BTreeMap<isize, Projected>>> = BTreeMap::new();
+        let mut root: BTreeMap<isize, BTreeMap<usize, BTreeMap<isize, Projected>>> =
+            BTreeMap::new();
         let mut edges: Vec<&Edge> = Vec::new();
         for g in &self.trans {
             for from in &g.vertices {
@@ -110,7 +122,12 @@ impl GSpanConfig {
         return next_id;
     }
 
-    fn report_single(&self, out: &mut BufWriter<File>, g: &mut Graph, gy_counts: &mut HashMap<usize, &usize>) {
+    fn report_single(
+        &self,
+        out: &mut BufWriter<File>,
+        g: &mut Graph,
+        gy_counts: &mut HashMap<usize, &usize>,
+    ) {
         let mut sup: usize = 0;
         for value in gy_counts.values() {
             sup += *value;
@@ -126,8 +143,13 @@ impl GSpanConfig {
         out.write(b"\n");
     }
 
-
-    fn report(&self, sup: usize, dfs_code: &DFSCode, next_id: &mut usize, out: &mut BufWriter<File>) {
+    fn report(
+        &self,
+        sup: usize,
+        dfs_code: &DFSCode,
+        next_id: &mut usize,
+        out: &mut BufWriter<File>,
+    ) {
         if self.max_pat_max >= self.max_pat_min && dfs_code.count_node() > self.max_pat_max {
             return;
         }
@@ -142,9 +164,13 @@ impl GSpanConfig {
         out.write(b"\n");
     }
 
-
-    fn project(&self, projected: &Projected, dfs_code: &mut DFSCode, next_id: &mut usize, out: &mut BufWriter<File>) {
-
+    fn project(
+        &self,
+        projected: &Projected,
+        dfs_code: &mut DFSCode,
+        next_id: &mut usize,
+        out: &mut BufWriter<File>,
+    ) {
         // Check if the pattern is frequent enough
         let sup: usize = self.support(projected);
         if sup < self.min_sup {
@@ -177,8 +203,8 @@ impl GSpanConfig {
         let min_label = dfs_code.dfs_vec.get(0).unwrap().from_label;
         let max_toc = dfs_code.dfs_vec.get(*rm_path.get(0).unwrap()).unwrap().to;
 
-
-        let mut new_fwd_root: BTreeMap<usize, BTreeMap<usize, BTreeMap<isize, Projected>>> = BTreeMap::new();
+        let mut new_fwd_root: BTreeMap<usize, BTreeMap<usize, BTreeMap<isize, Projected>>> =
+            BTreeMap::new();
         let mut new_bck_root: BTreeMap<usize, BTreeMap<usize, Projected>> = BTreeMap::new();
         let mut edges: Vec<&Edge> = Vec::new();
 
@@ -193,7 +219,8 @@ impl GSpanConfig {
                     self.trans.get(id).unwrap(),
                     history.histories.get(*rm_path.get(0).unwrap()).unwrap(),
                     history.histories.get(*rm_path.get(i).unwrap()).unwrap(),
-                    &history);
+                    &history,
+                );
                 if let Some(e) = e {
                     let key_1 = dfs_code.dfs_vec.get(*rm_path.get(i).unwrap()).unwrap().from;
                     let root_1 = new_bck_root.entry(key_1).or_insert(BTreeMap::new());
@@ -214,7 +241,14 @@ impl GSpanConfig {
                     let root_1 = new_fwd_root.entry(max_toc).or_insert(BTreeMap::new());
                     let key_2 = it.e_label;
                     let root_2 = root_1.entry(key_2).or_insert(BTreeMap::new());
-                    let key_3 = self.trans.get(id).unwrap().vertices.get(it.to).unwrap().label;
+                    let key_3 = self
+                        .trans
+                        .get(id)
+                        .unwrap()
+                        .vertices
+                        .get(it.to)
+                        .unwrap()
+                        .label;
                     let root_3 = root_2.entry(key_3).or_insert(Projected::new());
                     root_3.push(id, it, Some(&a_projected));
                 }
@@ -226,13 +260,21 @@ impl GSpanConfig {
                     history.histories.get(*a_rm_path).unwrap(),
                     min_label,
                     &history,
-                    &mut edges) {
+                    &mut edges,
+                ) {
                     for it in &edges {
                         let key_1 = dfs_code.dfs_vec.get(*a_rm_path).unwrap().from;
                         let root_1 = new_fwd_root.entry(key_1).or_insert(BTreeMap::new());
                         let key_2 = it.e_label;
                         let root_2 = root_1.entry(key_2).or_insert(BTreeMap::new());
-                        let key_3 = self.trans.get(id).unwrap().vertices.get(it.to).unwrap().label;
+                        let key_3 = self
+                            .trans
+                            .get(id)
+                            .unwrap()
+                            .vertices
+                            .get(it.to)
+                            .unwrap()
+                            .label;
                         let root_3 = root_2.entry(key_3).or_insert(Projected::new());
                         root_3.push(id, it, Some(a_projected));
                     }
@@ -283,9 +325,9 @@ impl GSpanConfig {
 
         let mut dfs_code_is_min = DFSCode::new();
 
-        let mut root: BTreeMap<isize, BTreeMap<usize, BTreeMap<isize, Projected>>> = BTreeMap::new();
+        let mut root: BTreeMap<isize, BTreeMap<usize, BTreeMap<isize, Projected>>> =
+            BTreeMap::new();
         let mut edges: Vec<&Edge> = Vec::new();
-
 
         for from in &graph_is_min.vertices {
             if get_forward_root(&graph_is_min, from, &mut edges) {
@@ -307,14 +349,30 @@ impl GSpanConfig {
         let e_label = e_label_binding.1;
         let to_label_binding = e_label.first_key_value().unwrap();
         let to_label = to_label_binding.1;
-        dfs_code_is_min.push(0, 1, *from_label_binding.0, *e_label_binding.0, *to_label_binding.0);
+        dfs_code_is_min.push(
+            0,
+            1,
+            *from_label_binding.0,
+            *e_label_binding.0,
+            *to_label_binding.0,
+        );
         self.is_min_project(to_label, dfs_code, &mut dfs_code_is_min, &graph_is_min)
     }
 
-    fn is_min_project(&self, projected: &Projected, dfs_code: &DFSCode, dfs_code_is_min: &mut DFSCode, graph_is_min: &Graph) -> bool {
+    fn is_min_project(
+        &self,
+        projected: &Projected,
+        dfs_code: &DFSCode,
+        dfs_code_is_min: &mut DFSCode,
+        graph_is_min: &Graph,
+    ) -> bool {
         let rm_path = dfs_code_is_min.build_rm_path();
         let min_label = dfs_code_is_min.dfs_vec.get(0).unwrap().from_label;
-        let max_toc: usize = dfs_code_is_min.dfs_vec.get(*rm_path.get(0).unwrap()).unwrap().to;
+        let max_toc: usize = dfs_code_is_min
+            .dfs_vec
+            .get(*rm_path.get(0).unwrap())
+            .unwrap()
+            .to;
 
         {
             let mut root: BTreeMap<usize, Projected> = BTreeMap::new();
@@ -333,7 +391,11 @@ impl GSpanConfig {
                     if let Some(e) = e {
                         let key_1 = e.e_label;
                         let root_1: &mut Projected = root.entry(key_1).or_insert(Projected::new());
-                        new_to = dfs_code_is_min.dfs_vec.get(*rm_path.get(i).unwrap()).unwrap().from;
+                        new_to = dfs_code_is_min
+                            .dfs_vec
+                            .get(*rm_path.get(i).unwrap())
+                            .unwrap()
+                            .from;
                         root_1.push(key_1, e, Some(cur));
                         flg = true;
                     }
@@ -345,7 +407,15 @@ impl GSpanConfig {
             if flg {
                 let e_label = root.first_entry().unwrap();
                 dfs_code_is_min.push(max_toc, new_to, -1, *e_label.key(), -1);
-                if dfs_code.dfs_vec.get(dfs_code_is_min.dfs_vec.len() - 1).unwrap().ne(dfs_code_is_min.dfs_vec.get(dfs_code_is_min.dfs_vec.len() - 1).unwrap()) {
+                if dfs_code
+                    .dfs_vec
+                    .get(dfs_code_is_min.dfs_vec.len() - 1)
+                    .unwrap()
+                    .ne(dfs_code_is_min
+                        .dfs_vec
+                        .get(dfs_code_is_min.dfs_vec.len() - 1)
+                        .unwrap())
+                {
                     return false;
                 }
                 return self.is_min_project(e_label.get(), dfs_code, dfs_code_is_min, graph_is_min);
@@ -360,7 +430,13 @@ impl GSpanConfig {
 
             for cur in projected.projections.iter() {
                 let history: History = History::build(cur);
-                if get_forward_pure(graph_is_min, history.histories.get(*rm_path.get(0).unwrap()).unwrap(), min_label, &history, &mut edges) {
+                if get_forward_pure(
+                    graph_is_min,
+                    history.histories.get(*rm_path.get(0).unwrap()).unwrap(),
+                    min_label,
+                    &history,
+                    &mut edges,
+                ) {
                     flg = true;
                     new_from = max_toc;
                     for it in &edges {
@@ -376,9 +452,19 @@ impl GSpanConfig {
                 for i in 0..rm_path.len() {
                     for cur in projected.projections.iter() {
                         let history: History = History::build(cur);
-                        if get_forward_rm_path(graph_is_min, history.histories.get(*rm_path.get(i).unwrap()).unwrap(), min_label, &history, &mut edges) {
+                        if get_forward_rm_path(
+                            graph_is_min,
+                            history.histories.get(*rm_path.get(i).unwrap()).unwrap(),
+                            min_label,
+                            &history,
+                            &mut edges,
+                        ) {
                             flg = true;
-                            new_from = dfs_code_is_min.dfs_vec.get(*rm_path.get(i).unwrap()).unwrap().from;
+                            new_from = dfs_code_is_min
+                                .dfs_vec
+                                .get(*rm_path.get(i).unwrap())
+                                .unwrap()
+                                .from;
                             for it in &edges {
                                 let key_1 = it.e_label;
                                 let root_1 = root.entry(key_1).or_insert(BTreeMap::new());
@@ -398,8 +484,19 @@ impl GSpanConfig {
                 let e_label = e_label_binding.1;
                 let to_label_binding = e_label.first_key_value().unwrap();
                 let to_label = to_label_binding.1;
-                dfs_code_is_min.push(new_from, max_toc + 1, -1, *e_label_binding.0, *to_label_binding.0);
-                if dfs_code.dfs_vec.get(dfs_code_is_min.dfs_vec.len() - 1).unwrap().ne(dfs_code_is_min.dfs_vec.last().unwrap()) {
+                dfs_code_is_min.push(
+                    new_from,
+                    max_toc + 1,
+                    -1,
+                    *e_label_binding.0,
+                    *to_label_binding.0,
+                );
+                if dfs_code
+                    .dfs_vec
+                    .get(dfs_code_is_min.dfs_vec.len() - 1)
+                    .unwrap()
+                    .ne(dfs_code_is_min.dfs_vec.last().unwrap())
+                {
                     return false;
                 }
                 return self.is_min_project(to_label, dfs_code, dfs_code_is_min, graph_is_min);
@@ -408,4 +505,3 @@ impl GSpanConfig {
         true
     }
 }
-
