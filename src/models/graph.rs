@@ -62,10 +62,11 @@ impl Graph {
         path: P,
         directed: bool,
     ) -> Result<Vec<Graph>, GraphSetParseError>
-    where
-        P: AsRef<Path>,
+        where
+            P: AsRef<Path>,
     {
         let mut graph_list = Vec::new();
+        let mut graph_id = 0;
         let mut current_graph: Graph = Graph::new(usize::MAX, directed);
         let line_reader = read_lines(path);
         match line_reader {
@@ -90,11 +91,19 @@ impl Graph {
                                     }
                                     let id = id.parse::<usize>();
                                     match id {
-                                        Ok(id) => current_graph = Graph::new(id, directed),
+                                        Ok(id) => {
+                                            current_graph = Graph::new(id, directed);
+                                            if id != graph_id {
+                                                return Err(GraphSetParseError {
+                                                    message: format!("Graph with graph id {}, it should have the id {}", id, graph_id),
+                                                });
+                                            }
+                                            graph_id += 1;
+                                        },
                                         _ => {
                                             return Err(GraphSetParseError {
                                                 message: "Id for graph invalid".to_string(),
-                                            })
+                                            });
                                         }
                                     }
                                 }
@@ -104,7 +113,7 @@ impl Graph {
                                             "Graph {}, Missing id for a vertex in",
                                             current_graph.id.to_string()
                                         )
-                                        .to_string(),
+                                            .to_string(),
                                     })?;
                                     let id = id.parse::<usize>();
                                     match id {
@@ -120,7 +129,7 @@ impl Graph {
                                                     "Graph {}, Missing label for a vertex",
                                                     current_graph.id.to_string()
                                                 )
-                                                .to_string(),
+                                                    .to_string(),
                                             })?;
                                             let label = label.parse::<isize>();
                                             if label.is_err() {
@@ -139,9 +148,8 @@ impl Graph {
                                                 message: format!(
                                                     "Graph {}, Vertex ID invalid",
                                                     current_graph.id.to_string()
-                                                )
-                                                .to_string(),
-                                            })
+                                                ).to_string(),
+                                            });
                                         }
                                     }
                                 }
@@ -151,7 +159,7 @@ impl Graph {
                                             "Graph {}, Missing from id for an edge",
                                             current_graph.id.to_string()
                                         )
-                                        .to_string(),
+                                            .to_string(),
                                     })?;
                                     let from_id: usize = match from_id.parse() {
                                         Ok(value) => value,
@@ -161,8 +169,8 @@ impl Graph {
                                                     "Graph {}, Invalid from id for an edge",
                                                     current_graph.id.to_string()
                                                 )
-                                                .to_string(),
-                                            })
+                                                    .to_string(),
+                                            });
                                         }
                                     };
                                     let to_id = data.next().ok_or(GraphSetParseError {
@@ -170,7 +178,7 @@ impl Graph {
                                             "Graph {}, Missing to id for a edge in",
                                             current_graph.id.to_string()
                                         )
-                                        .to_string(),
+                                            .to_string(),
                                     })?;
                                     let to_id: usize = match to_id.parse() {
                                         Ok(value) => value,
@@ -179,17 +187,15 @@ impl Graph {
                                                 message: format!(
                                                     "Graph {}, Invalid to id for a edge",
                                                     current_graph.id.to_string()
-                                                )
-                                                .to_string(),
-                                            })
+                                                ).to_string(),
+                                            });
                                         }
                                     };
                                     let e_label = data.next().ok_or(GraphSetParseError {
                                         message: format!(
                                             "Graph {}, Missing edge label for a edge",
                                             current_graph.id.to_string()
-                                        )
-                                        .to_string(),
+                                        ).to_string(),
                                     })?;
                                     let e_label: usize = match e_label.parse() {
                                         Ok(value) => value,
@@ -198,9 +204,8 @@ impl Graph {
                                                 message: format!(
                                                     "Graph {}, Invalid e_label for a edge",
                                                     current_graph.id.to_string()
-                                                )
-                                                .to_string(),
-                                            })
+                                                ).to_string(),
+                                            });
                                         }
                                     };
 
@@ -211,8 +216,7 @@ impl Graph {
                                             message: format!(
                                                 "Graph {}, Edge invalid, ids of vertices not found",
                                                 current_graph.id.to_string()
-                                            )
-                                            .to_string(),
+                                            ).to_string(),
                                         });
                                     }
 
@@ -227,10 +231,10 @@ impl Graph {
                                                 "Graph {}, Edge invalid, ids of vertices not found",
                                                 current_graph.id.to_string()
                                             )
-                                            .to_string(),
+                                                .to_string(),
                                         }),
                                     }
-                                    if directed {
+                                    if !directed {
                                         let from_vertex: Option<&mut Vertex> =
                                             current_graph.vertices.get_mut(to_id);
                                         match from_vertex {
@@ -252,7 +256,7 @@ impl Graph {
             Err(_) => {
                 return Err(GraphSetParseError {
                     message: "Error reading file".to_string(),
-                })
+                });
             }
         }
         if current_graph.id != usize::MAX {
@@ -281,8 +285,8 @@ impl Graph {
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-where
-    P: AsRef<Path>,
+    where
+        P: AsRef<Path>,
 {
     let file = File::open(filename)?;
     Ok(io::BufReader::new(file).lines())

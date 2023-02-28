@@ -81,13 +81,9 @@ impl GSpanConfig {
             for (key, it2) in single_vertex.iter() {
                 counts[*key] = *it2.get(&frequent_label).or(Some(&0)).unwrap();
             }
-            let mut gy_counts: HashMap<usize, &usize> = HashMap::new();
-            for i in 0..counts.len() {
-                gy_counts.insert(i, counts.get(i).unwrap());
-            }
 
             // Report single-graphs
-            self.report_single(&mut out, &mut g, &mut gy_counts);
+            self.report_single(&mut out, &mut g, counts.iter().sum());
         }
         // 3. Subgraphs > Verticies
         let mut root: BTreeMap<isize, BTreeMap<usize, BTreeMap<isize, Projected>>> =
@@ -126,13 +122,8 @@ impl GSpanConfig {
         &self,
         out: &mut BufWriter<File>,
         g: &mut Graph,
-        gy_counts: &mut HashMap<usize, &usize>,
+        sup: usize,
     ) {
-        let mut sup: usize = 0;
-        for value in gy_counts.values() {
-            sup += *value;
-        }
-
         if self.max_pat_max >= self.max_pat_min && g.vertices.len() > self.max_pat_max {
             return;
         }
