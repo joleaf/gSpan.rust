@@ -18,16 +18,24 @@ jobs:
           - x86_64-apple-darwin
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: Set up Rust toolchain
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target=${{ matrix.target }}
+      - name: Install Apple toolchain
+        if: matrix.target == 'x86_64-apple-darwin'
+        run: rustup target add x86_64-apple-darwin && rustup component add rust-src && brew install llvm
+      - name: Build
+        run: |
+          if [ ${{ matrix.target }} = "x86_64-apple-darwin" ]; then
+            export CC=/usr/local/opt/llvm/bin/clang
+            export CXX=/usr/local/opt/llvm/bin/clang++
+            cargo build --release --target=${{ matrix.target }}
+          else
+            cargo build --release --target=${{ matrix.target }} --verbose
+          fi
 
   release:
     name: Create Release
