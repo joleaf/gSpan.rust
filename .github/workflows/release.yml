@@ -1,6 +1,10 @@
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - '*'
+  pull_request:
 
-name: Cross-compile
+name: Cross-compile and Release
 
 jobs:
   build:
@@ -11,6 +15,7 @@ jobs:
         target:
           - armv7-unknown-linux-gnueabihf
           - powerpc64-unknown-linux-gnu
+          - x86_64-apple-darwin
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -23,3 +28,38 @@ jobs:
           use-cross: true
           command: build
           args: --release --target=${{ matrix.target }}
+
+  release:
+    name: Create Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.target }}-release
+          path: target/${{ matrix.target }}/release/*
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ## Changes
+            - Add description of changes made in this release
+          draft: false
+          prerelease: false
+      - name: Attach Artifacts
+        id: attach_artifacts
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/${{ matrix.target }}/release/*
+          asset_name: ${{ matrix.target }}-release
+          asset_content_type: application/zip
