@@ -15,13 +15,12 @@ impl Vertex {
                 None => 0,
                 Some(label) => label,
             },
-            edges: Vec::new(),
+            edges: Vec::with_capacity(8),
         }
     }
 
     pub fn push(&mut self, to: usize, e_label: usize) {
-        let e = Edge::new(self.id, to, e_label);
-        self.edges.push(e);
+        self.edges.push(Edge::new(self.id, to, e_label));
     }
 
     pub fn to_str_repr(&self) -> String {

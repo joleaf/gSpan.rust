@@ -12,6 +12,7 @@ categories = ["algorithm", "command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.1.7", features = ["derive"] }
+rustc-hash = "1.1.0"
 
 [profile.release]
 lto = true

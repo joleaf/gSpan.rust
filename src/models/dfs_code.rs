@@ -10,7 +10,7 @@ pub struct DFSCode {
 impl DFSCode {
     pub fn new() -> DFSCode {
         DFSCode {
-            dfs_vec: Vec::new(),
+            dfs_vec: Vec::with_capacity(32),
         }
     }
 

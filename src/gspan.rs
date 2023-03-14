@@ -4,7 +4,7 @@ use crate::models::edge::Edge;
 use crate::models::graph::Graph;
 use crate::models::history::History;
 use crate::models::projected::Projected;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 
@@ -76,7 +76,7 @@ impl GSpanConfig {
             let mut v = g.create_vertex();
             v.label = *frequent_label;
 
-            let mut counts: Vec<usize> = Vec::new();
+            let mut counts: Vec<usize> = Vec::with_capacity(64);
             counts.resize(self.trans.len(), 0);
             for (key, it2) in single_vertex.iter() {
                 counts[*key] = *it2.get(&frequent_label).or(Some(&0)).unwrap();
@@ -88,7 +88,7 @@ impl GSpanConfig {
         // 3. Subgraphs > Verticies
         let mut root: BTreeMap<isize, BTreeMap<usize, BTreeMap<isize, Projected>>> =
             BTreeMap::new();
-        let mut edges: Vec<&Edge> = Vec::new();
+        let mut edges: Vec<&Edge> = Vec::with_capacity(32);
         for g in &self.trans {
             for from in &g.vertices {
                 if get_forward_root(&g, from, &mut edges) {
@@ -197,7 +197,7 @@ impl GSpanConfig {
         let mut new_fwd_root: BTreeMap<usize, BTreeMap<usize, BTreeMap<isize, Projected>>> =
             BTreeMap::new();
         let mut new_bck_root: BTreeMap<usize, BTreeMap<usize, Projected>> = BTreeMap::new();
-        let mut edges: Vec<&Edge> = Vec::new();
+        let mut edges: Vec<&Edge> = Vec::with_capacity(32);
 
         // Enumerate all possible one edge extensions of the current substructure.
         for a_projected in projected.projections.iter() {
@@ -318,7 +318,7 @@ impl GSpanConfig {
 
         let mut root: BTreeMap<isize, BTreeMap<usize, BTreeMap<isize, Projected>>> =
             BTreeMap::new();
-        let mut edges: Vec<&Edge> = Vec::new();
+        let mut edges: Vec<&Edge> = Vec::with_capacity(32);
 
         for from in &graph_is_min.vertices {
             if get_forward_root(&graph_is_min, from, &mut edges) {
@@ -417,7 +417,7 @@ impl GSpanConfig {
             let mut flg = false;
             let mut new_from = 0;
             let mut root: BTreeMap<usize, BTreeMap<isize, Projected>> = BTreeMap::new();
-            let mut edges: Vec<&Edge> = Vec::new();
+            let mut edges: Vec<&Edge> = Vec::with_capacity(32);
 
             for cur in projected.projections.iter() {
                 let history: History = History::build(cur);

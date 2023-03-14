@@ -30,7 +30,7 @@ impl Graph {
             id,
             edge_size: 0,
             directed,
-            vertices: Vec::new(),
+            vertices: Vec::with_capacity(32),
         }
     }
 

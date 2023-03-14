@@ -1,20 +1,20 @@
 use crate::models::edge::Edge;
 use crate::models::pdfs::PDFS;
 use std::borrow::Borrow;
-use std::collections::HashSet;
+use rustc_hash::FxHashSet;
 
 pub struct History<'a> {
     pub histories: Vec<&'a Edge>,
-    pub edges: HashSet<usize>,
-    pub vertices: HashSet<usize>,
+    pub edges: FxHashSet<usize>,
+    pub vertices: FxHashSet<usize>,
 }
 
 impl<'a> History<'a> {
     pub fn build(e: &'a PDFS<'a>) -> History<'a> {
         let mut history = History {
-            histories: Vec::new(),
-            edges: HashSet::new(),
-            vertices: HashSet::new(),
+            histories: Vec::with_capacity(32),
+            edges: FxHashSet::default(),
+            vertices: FxHashSet::default(),
         };
         let mut e = e.borrow();
         loop {
