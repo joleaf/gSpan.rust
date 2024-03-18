@@ -1,6 +1,6 @@
 [package]
 name = "gspan"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2021"
 authors = ["Jonas Blatt <jonblatt1992@gmail.com>"]
 license = "MIT"
@@ -8,10 +8,10 @@ description = "A tool to search frequent subgraphs in a graph database"
 readme = "Readme.md"
 repository = "https://github.com/joleaf/gSpan.rust"
 keywords = ["cli", "gspan", "graph", "frequent", 'subgraph']
-categories = ["algorithm", "command-line-utilities"]
+categories = ["algorithms", "command-line-utilities"]
 
 [dependencies]
-clap = { version = "4.1.7", features = ["derive"] }
+clap = { version = "4.5.3", features = ["derive"] }
 rustc-hash = "1.1.0"
 
 [profile.release]

@@ -1,6 +1,5 @@
 use crate::models::edge::Edge;
 use crate::models::pdfs::PDFS;
-use std::borrow::Borrow;
 use rustc_hash::FxHashSet;
 
 pub struct History<'a> {
@@ -16,7 +15,7 @@ impl<'a> History<'a> {
             edges: FxHashSet::default(),
             vertices: FxHashSet::default(),
         };
-        let mut e = e.borrow();
+        let mut e = e;
         loop {
             history.histories.push(e.edge);
             history.edges.insert(e.edge.id);

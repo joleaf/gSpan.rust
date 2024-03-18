@@ -50,7 +50,7 @@ impl GSpanConfig {
             for graph in &self.trans {
                 for vertex in &graph.vertices {
                     let key = vertex.label;
-                    let d = single_vertex.entry(graph.id).or_insert(BTreeMap::new());
+                    let d = single_vertex.entry(graph.id).or_default();
                     if d.get(&key).is_none() {
                         single_vertex_label
                             .entry(key)
@@ -73,7 +73,7 @@ impl GSpanConfig {
             let id = next_id.clone();
             next_id += 1;
             let mut g = Graph::new(id, self.directed);
-            let mut v = g.create_vertex();
+            let v = g.create_vertex();
             v.label = *frequent_label;
 
             let mut counts: Vec<usize> = Vec::with_capacity(64);
@@ -115,7 +115,7 @@ impl GSpanConfig {
                 }
             }
         }
-        return next_id;
+        next_id
     }
 
     fn report_single(
@@ -130,8 +130,8 @@ impl GSpanConfig {
         if self.max_pat_min > 0 && g.vertices.len() < self.max_pat_min {
             return;
         }
-        out.write(&*g.to_str_repr(Some(sup)).into_bytes());
-        out.write(b"\n");
+        out.write(&*g.to_str_repr(Some(sup)).into_bytes()).unwrap();
+        out.write(b"\n").unwrap();
     }
 
     fn report(
@@ -151,8 +151,8 @@ impl GSpanConfig {
         *next_id += 1;
         let mut g = Graph::new(id, self.directed);
         dfs_code.to_graph(&mut g, self.single_nodes);
-        out.write(&*g.to_str_repr(Some(sup)).into_bytes());
-        out.write(b"\n");
+        out.write(&*g.to_str_repr(Some(sup)).into_bytes()).unwrap();
+        out.write(b"\n").unwrap();
     }
 
     fn project(
